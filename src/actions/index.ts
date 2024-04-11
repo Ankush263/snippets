@@ -2,12 +2,15 @@
 
 import { db } from '@/db';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 export async function editSnippet(id: number, code: string) {
 	await db.snippet.update({
 		where: { id },
 		data: { code },
 	});
+
+	revalidatePath(`/snippets/${id}`);
 	redirect(`/snippets/${id}`);
 }
 
@@ -16,6 +19,7 @@ export async function deleteSnipt(id: number) {
 		where: { id },
 	});
 
+	revalidatePath('/');
 	redirect('/');
 }
 
@@ -24,7 +28,6 @@ export async function createSnippet(
 	formData: FormData
 ) {
 	try {
-		// Chack the user's inputs and make sure they're valid
 		const title = formData.get('title');
 		const code = formData.get('code');
 
@@ -40,7 +43,6 @@ export async function createSnippet(
 			};
 		}
 
-		// Create a new recoard in the database
 		await db.snippet.create({
 			data: {
 				title,
@@ -59,6 +61,6 @@ export async function createSnippet(
 		}
 	}
 
-	// Redirect the user back to root route
+	revalidatePath('/');
 	redirect('/');
 }
